@@ -6,6 +6,12 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
+/**
+ * Remote server that can read and write data from the filesystem
+ * 
+ * @author Celada, Soria
+ *
+ */
 public class RemoteServer extends UnicastRemoteObject implements IfaceRemoteServer {
     
     public RemoteServer() throws RemoteException {
@@ -33,7 +39,7 @@ public class RemoteServer extends UnicastRemoteObject implements IfaceRemoteServ
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        System.out.println("Sended");
         
         return null;
     }
