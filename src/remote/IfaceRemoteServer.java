@@ -1,6 +1,7 @@
 package remote;
 
 import java.rmi.Remote;
+import java.rmi.RemoteException;
 
 /**
  * Implementors of this interface can be 
@@ -11,5 +12,7 @@ import java.rmi.Remote;
  */
 public interface IfaceRemoteServer extends Remote {
     
-    public byte[] 
+    public byte[] read(String fileName, int position, int bytesToRead) throws RemoteException;
+    
+    public void write(String fileName, int position, byte[] buffer) throws RemoteException;
 }
