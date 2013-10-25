@@ -14,5 +14,5 @@ public interface IfaceRemoteServer extends Remote {
     
     public byte[] read(String fileName, int position, int bytesToRead) throws RemoteException;
     
-    public void write(String fileName, int position, byte[] buffer) throws RemoteException;
+    public int write(String fileName, byte[] buffer, int bytesLength) throws RemoteException;
 }
