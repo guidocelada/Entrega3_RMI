@@ -1,5 +1,5 @@
 #!/bin/bash
-cd src/
+
 #Compile Server
 rmic remote.RemoteServer
 javac remote/*.java
