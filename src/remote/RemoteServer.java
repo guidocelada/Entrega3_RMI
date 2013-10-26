@@ -17,12 +17,6 @@ import java.util.Arrays;
  */
 public class RemoteServer extends UnicastRemoteObject implements
         IfaceRemoteServer {
-
-    private static final int BUFFER_LENGHT = 1024;
-
-    /**
-	 * 
-	 */
     private static final long serialVersionUID = 1L;
 
     public RemoteServer() throws RemoteException {
@@ -37,7 +31,7 @@ public class RemoteServer extends UnicastRemoteObject implements
     public byte[] read(String fileName, int position, int bytesLength)
             throws RemoteException, FileNotFoundException {
         FileInputStream inputFile = null;
-        byte[] buffer = new byte[BUFFER_LENGHT];
+        byte[] buffer = new byte[bytesLength];
 
         // Try to open the file
         try {
@@ -53,9 +47,11 @@ public class RemoteServer extends UnicastRemoteObject implements
         }
         // Read the file
         try {
-            int readBytes = inputFile.read(buffer, position, bytesLength);
+        	if (inputFile.skip(position) != position)
+        		return null;
+            int readBytes = inputFile.read(buffer, 0, bytesLength);
             // Truncate the buffer to have the correct size
-            if (readBytes != BUFFER_LENGHT)
+            if (readBytes != bytesLength)
                 buffer = Arrays.copyOf(buffer, readBytes);
         } catch (IndexOutOfBoundsException e) {
             System.out
