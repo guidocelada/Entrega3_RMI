@@ -11,10 +11,13 @@ public class StartRemoteObject {
             /* Register the object using Naming.rebind(...) */
             String rname = "//localhost:" + Registry.REGISTRY_PORT + "/remote";
             Naming.rebind(rname, robject);
+            System.out.println("\u001B[32mServer started\u001B[0m");
         } catch (Exception e) {
-            System.out.println("Hey, an error occurred at Naming.rebind");
+            System.out
+                    .println("\u001B[31mHey, an error occurred at Naming.rebind");
             e.printStackTrace();
             System.out.println(e.getMessage());
+            System.out.println("\u001B[0m");
         }
     }
 }

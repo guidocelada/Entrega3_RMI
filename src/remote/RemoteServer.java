@@ -13,106 +13,100 @@ import java.util.Arrays;
  * Remote server that can read and write data from the filesystem
  * 
  * @author Celada, Soria
- *
+ * 
  */
-public class RemoteServer extends UnicastRemoteObject implements IfaceRemoteServer {
-    
+public class RemoteServer extends UnicastRemoteObject implements
+        IfaceRemoteServer {
+
+    private static final int BUFFER_LENGHT = 1024;
+
     /**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public RemoteServer() throws RemoteException {
+    public RemoteServer() throws RemoteException {
         super();
     }
-    
+
     /*
-    * Given a name of a file, an offset, and a number of bytes to read
-    * returns the data in the file starting from that offset,
-    * and the number of bytes that effectively read.
-    */
-    //TODO: return number of bytes???
+     * Given a name of a file, an offset, and a number of bytes to read returns
+     * the data in the file starting from that offset, and the number of bytes
+     * that effectively read.
+     */
     public byte[] read(String fileName, int position, int bytesLength)
-            throws RemoteException 
-    {
+            throws RemoteException, FileNotFoundException {
         FileInputStream inputFile = null;
-        byte[] buffer = new byte[bytesLength];
-        
+        byte[] buffer = new byte[BUFFER_LENGHT];
+
         // Try to open the file
         try {
-        	inputFile = new FileInputStream(fileName);
-        }     
-        catch (FileNotFoundException e) {
-        	StringBuffer errorString = new StringBuffer();
-        	errorString.append("The file \"");
-        	errorString.append(fileName);
-        	errorString.append("\" doesn't exists in the filesystem.");
+            inputFile = new FileInputStream(fileName);
+        } catch (FileNotFoundException e) {
+            StringBuffer errorString = new StringBuffer();
+            errorString.append("\u001B[31mA client asked for the file \"");
+            errorString.append(fileName);
+            errorString
+                    .append("\" wich doesn't exists in the filesystem.\u001B[0m");
             System.out.println(errorString.toString());
-        	
-        	return null;
-        } 
-        
+            throw new FileNotFoundException();
+        }
         // Read the file
         try {
             int readBytes = inputFile.read(buffer, position, bytesLength);
             // Truncate the buffer to have the correct size
-            if (readBytes != bytesLength)
-            	buffer = Arrays.copyOf(buffer, readBytes);
-        } 
-        catch (IOException e) {
-        	System.out.println("Unhandled Input/Output Exception:");
+            if (readBytes != BUFFER_LENGHT)
+                buffer = Arrays.copyOf(buffer, readBytes);
+        } catch (IndexOutOfBoundsException e) {
+            System.out
+                    .println("\u001B[31mPosition pointer it's out of bounds\u001B[0m");
+            throw new IndexOutOfBoundsException();
+        } catch (Exception e) {
             System.out.println(e.getMessage());
-            return null;
+        } finally {
+            if (inputFile != null) {
+                try {
+                    inputFile.close();
+                } catch (IOException e) {
+                    return null;
+                }
+            }
         }
-        finally {
-        	if (inputFile != null) {
-        		try {
-        			inputFile.close();
-        		}
-        		catch (IOException e) {
-        			return null;
-        		}
-        	}
-        }
-        
+        System.out.println("\u001B[32mRead request: done \u001B[0m");
         return buffer;
     }
 
     /*
-    * Given a name of a file, a number of bytes to write
-    * and a buffer with the data, writes the data into a file.
-    * if the file exists, it appends the data to the final,
-    * if not, it creates the file with the data.
-    * Returns the number of bytes that effectively write.
-    */
+     * Given a name of a file, a number of bytes to write and a buffer with the
+     * data, writes the data into a file. if the file exists, it appends the
+     * data to the final, if not, it creates the file with the data. Returns the
+     * number of bytes that effectively write.
+     */
     public int write(String fileName, byte[] buffer, int bytesLength)
-            throws RemoteException 
-    {
+            throws RemoteException {
         FileOutputStream outputFile = null;
         int bytesWritten = 0;
         try {
-        	outputFile = new FileOutputStream(fileName, true);
-        	for (byte aByte : buffer) {
-        		outputFile.write(aByte);
-        		bytesWritten++;
-        	}
-            
-        }
-        catch (IOException e) {
-        	System.out.println("Unhandled Input/Output Exception:");
-        	System.out.println(e.getMessage());
-        }
-        finally {
-        	if (outputFile != null) {
-        		try {
-        			outputFile.close();
-        		}
-        		catch (IOException e) {
-        			return bytesWritten;
-        		}
-        	}
-        }
+            outputFile = new FileOutputStream(fileName, true);
+            for (byte aByte : buffer) {
+                outputFile.write(aByte);
+                bytesWritten++;
+            }
 
-        return bytesWritten;      
+        } catch (IOException e) {
+            System.out.println("\u001B[31mUnhandled Input/Output Exception:");
+            System.out.println(e.getMessage());
+            System.out.println("\u001B[0m");
+        } finally {
+            if (outputFile != null) {
+                try {
+                    outputFile.close();
+                } catch (IOException e) {
+                    return bytesWritten;
+                }
+            }
+        }
+        System.out.println("\u001B[32mWrite request: done \u001B[0m");
+        return bytesWritten;
     }
 }
